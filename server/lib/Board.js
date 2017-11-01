@@ -2,7 +2,7 @@
 export class Board {
     constructor() {
         // Initialize as empty board
-        this.board = Array(6).fill(Array(7));
+        this.board = Array(6).fill(Array(7).fill(0));
     }
 
     setTiles(board) {

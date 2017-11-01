@@ -7,3 +7,5 @@ const gameSchema = mongoose.Schema({
     blackPlayerId: String,
     board: [[Number]]
 });
+
+export const Game = mongoose.model('Game', gameSchema);
