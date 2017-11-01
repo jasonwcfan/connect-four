@@ -27,7 +27,7 @@ gameSchema.methods.reset = function() {
  * Set the board to the configuration of the given board
  */
 gameSchema.methods.setBoard = function() {
-    if (board.length != COLUMS) {
+    if (board.length != COLUMNS) {
         throw new Error('Board matrix has wrong number of columns');
     };
 
@@ -64,6 +64,10 @@ gameSchema.methods.addPiece = function(playerId, column) {
         throw new Error('Invalid move, column is not valid');
     }
 
+    if (this.getColumnCapacity(column) < 1) {
+        throw new Error('Invalid move, column is full');
+    }
+
     var playerCode = null;
 
     if (this.redPlayerId.equals(playerId)) {
@@ -72,14 +76,6 @@ gameSchema.methods.addPiece = function(playerId, column) {
         playerCode = BLACK_PLAYER_CODE;
     } else {
         throw new Error('Invalid player ID for this game');
-    }
-
-    if (this.getColumnCapacity(column) < 1) {
-        throw new Error('Invalid move, column must not be full');
-    }
-
-    if (!this.turnId.equals(playerId)) {
-        throw new Error('Invalid move, not this player\'s turn');
     }
 
     // Find the right cell to insert the new piece into
@@ -92,8 +88,17 @@ gameSchema.methods.addPiece = function(playerId, column) {
     }
 }
 
+/**
+ * Change the turnId to allow the next player to play.
+ */
 gameSchema.methods.changePlayer = function() {
-    // TODO
+    if (this.turnId.equals(this.redPlayerId)) {
+        this.turnId = this.blackPlayerId;
+    } else if (this.turnId.equals(this.blackPlayerId)) {
+        this.turnId = this.redPlayerId;
+    } else {
+        throw new Error('Invalid player ID on turnId field')
+    }
 }
 
 const Game = mongoose.model('Game', gameSchema);

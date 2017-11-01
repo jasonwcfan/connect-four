@@ -38,15 +38,17 @@ export async function createGame(req, res) {
  */
 export async function makeMove(req, res) {
     // Try converting the url param into a game ID to test validity
-    var playerId = null;
-    try {
-        playerId = new mongoose.Types.ObjectId(req.params.playerId);
-    } catch(err) {
+    var playerId = req.params.playerId;
+    var column = req.body.column;
+
+    if (playerId.length != 24) {
         res.status(400).send('Invalid player ID');
         return;
     }
 
-    var column = req.body.column;
+    // Convert playerId to a mongoose ObjectId
+    playerId = new mongoose.Types.ObjectId(playerId);
+
     var game = await getGameFromPlayerId(playerId);
 
     if (game == null) {
@@ -54,18 +56,26 @@ export async function makeMove(req, res) {
         return;
     }
 
-    try {
-        game.addPiece(playerId, column);
-    } catch(err) {
-        console.log('Error in making the next move:', err);
-        res.status(400).send(err);
+    if (!game.turnId.equals(playerId)) {
+        res.status(400).send('Invalid move, not this player\'s turn');
         return;
     }
 
-    game = await game.save();
-    console.log(game);
+    if (game.blackPlayerId === null || game.redPlayerId === null) {
+        res.status(400).send('Invalid move, one player is missing');
+        return;
+    }
 
-    res.send(game);
+    try {
+        game.addPiece(playerId, column);
+        game.changePlayer();
+        game = await game.save();
+        res.send(game);
+    } catch(err) {
+        console.log('Error in making the next move:', err);
+        res.status(500).send(err);
+        return;
+    }
 }
 
 async function getGameFromPlayerId(playerId) {
