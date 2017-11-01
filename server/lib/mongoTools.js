@@ -18,7 +18,3 @@ export const connectMongo = async () => {
 
     return db;
 };
-
-export const executeQuery = async () => {
-
-}

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import bodyParser from 'body-parser';
+import { ObjectId } from 'mongodb';
 import { connectMongo } from './lib/mongoTools';
 
 /**
@@ -18,10 +19,20 @@ const start = async () => {
     var games = mongo.collection('games');
 
     app.get('/game/*', bodyParser.json(), async function(req, res) {
-        console.log(req.params[0]);
-        var game = await games.findOne({});
-        console.log(doc);
-        res.send(200);
+        const gameId = new ObjectId(req.params[0]);
+        var game = await games.findOne({$or: [
+            {redPlayerId: gameId},
+            {blackPlayerId: gameId}
+        ]});
+
+        if (game == null) {
+            console.log('no games');
+
+            res.send('no game found');
+        } else {
+            console.log(game);
+        }
+
     })
 
     app.listen(process.env.PORT, function() {
