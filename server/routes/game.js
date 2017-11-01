@@ -4,76 +4,56 @@ import mongoose from 'mongoose';
 
 /**
  * Get a game from the database based on the given ID, if one exists
- * @param  {Object}     mongo The MongoDB database
- * @return {Function}         A function that handles the requeset
  */
-export function joinGame(mongo) {
-    const games = mongo.collection('games');
+export async function joinGame(req, res) {
+    var game = await getGameFromPlayerId(req.params.playerId);
 
-    return async function(req, res) {
-        var playerId = null;
-
-        // Try converting the url param into a game ID to test validity
-        try {
-            playerId = new mongoose.Types.ObjectId(req.params.playerId);
-        } catch(err) {
-            res.send('invalid game ID');
-            return;
-        }
-
-        console.log(playerId);
-
-        var game = await games.findOne({$or: [
-            {redPlayerId: playerId},
-            {blackPlayerId: playerId}
-        ]});
-
-        if (game == null) {
-            console.log('game not found');
-            res.send('game not found');
-        } else {
-            console.log('found game');
-            res.send(game)
-        }
+    if (game == null) {
+        console.log('game not found');
+        res.send('game not found');
+    } else {
+        console.log('found game');
+        res.send(game)
     }
 }
 
 /**
  * Create a new game
- * @param  {Object}     mongo The MongoDB database
- * @return {Function}         A function that handles the requeset
  */
-export function createGame(mongo) {
-    const games = mongo.collection('games');
+export async function createGame(req, res) {
+    var newGame = new Game({
+        redPlayerId: mongoose.Types.ObjectId(),
+        blackPlayerId: null,
+        board: Array(6).fill(Array(7).fill(0))
+    });
 
-    return async function(req, res) {
-        var newGame = new Game({
-            redPlayerId: mongoose.Types.ObjectId(),
-            blackPlayerId: null,
-            board: Array(6).fill(Array(7).fill(0))
-        });
+    var result = await newGame.save();
 
-        var result = await newGame.save();
-
-        res.send(result);
-    }
+    res.send(result);
 }
 
-export function makeMove(mongo) {
-    return async function(req, res) {
-        var gameId = null;
+/**
+ * Check the validity of a proposed move and record it
+ */
+export async function makeMove(req, res) {
+    var game = await getGameFromPlayerId(req.params.playerId);
 
-        // Try converting the url param into a game ID to test validity
-        try {
-            gameId = new ObjectId(req.params.playerId);
-        } catch(err) {
-            res.send('invalid game ID');
-            return;
-        }
+    var nextMove = req.body.nextMove;
+}
 
-        var game = await games.findOne({$or: [
-            {redPlayerId: gameId},
-            {blackPlayerId: gameId}
-        ]});
+async function getGameFromPlayerId(playerId) {
+    // Try converting the url param into a game ID to test validity
+    try {
+        playerId = new mongoose.Types.ObjectId(playerId);
+    } catch(err) {
+        res.send('invalid player ID');
+        return;
     }
+    console.log(playerId);
+    var game = await Game.findOne({$or: [
+        {redPlayerId: playerId},
+        {blackPlayerId: playerId}
+    ]});
+
+    return game;
 }

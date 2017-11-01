@@ -17,9 +17,9 @@ const start = async () => {
     const mongo = await connectMongo();
     const app = express();
 
-    app.get('/game/:playerId', bodyParser.json(), joinGame(mongo));
-    app.post('/game/', bodyParser.json(), createGame(mongo));
-    app.post('/game/:playerId', bodyParser.json(), makeMove(mongo));
+    app.get('/game/:playerId', bodyParser.json(), joinGame);
+    app.post('/game/', bodyParser.json(), createGame);
+    app.post('/game/:playerId', bodyParser.json(), makeMove);
 
 
     app.listen(process.env.PORT, function() {

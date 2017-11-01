@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const gameSchema = mongoose.Schema({
     redPlayerId: mongoose.Schema.Types.ObjectId,
     blackPlayerId: mongoose.Schema.Types.ObjectId,
+    turnId: mongoose.Schema.Types.ObjectId,
     board: [[Number]]
 });
 
