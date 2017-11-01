@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 /**
  * Get a game from the database based on the given ID, if one exists
  */
-export async function joinGame(req, res) {
+export async function rejoinGame(req, res) {
     var game = await getGameFromPlayerId(req.params.playerId);
 
     if (game == null) {
@@ -20,17 +20,33 @@ export async function joinGame(req, res) {
 /**
  * Create a new game
  */
-export async function createGame(req, res) {
+export async function joinNewGame(req, res) {
     const newPlayerId = mongoose.Types.ObjectId();
-    var newGame = new Game({
-        redPlayerId: newPlayerId,
-        blackPlayerId: null,
-        turnId: newPlayerId
-    });
 
-    var result = await newGame.save();
+    // Try to find a game with a player already in it
+    var lobby = await Game.findOne({$or: [
+        {redPlayerId: null},
+        {blackPlayerId: null}
+    ]});
 
-    res.send(result);
+    if (lobby != null) {
+        lobby.blackPlayerId = newPlayerId;
+        lobby = await lobby.save();
+
+        res.send(lobby);
+    } else {
+        var newGame = new Game({
+            redPlayerId: newPlayerId,
+            blackPlayerId: null,
+            turnId: newPlayerId
+        });
+
+        var newGame = await newGame.save();
+
+        res.send(newGame);
+    }
+
+
 }
 
 /**
