@@ -7,7 +7,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { connectMongo } from './lib/mongoTools';
 
-import { getGame, createGame } from './routes/game';
+import { joinGame, createGame, makeMove } from './routes/game';
 
 /**
  * Express configuration
@@ -17,9 +17,9 @@ const start = async () => {
     const mongo = await connectMongo();
     const app = express();
 
-    app.get('/game/*', bodyParser.json(), getGame(mongo));
+    app.get('/game/:playerId', bodyParser.json(), joinGame(mongo));
     app.post('/game/', bodyParser.json(), createGame(mongo));
-
+    app.post('/game/:playerId', bodyParser.json(), makeMove(mongo));
 
 
     app.listen(process.env.PORT, function() {

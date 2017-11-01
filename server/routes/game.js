@@ -7,23 +7,25 @@ import mongoose from 'mongoose';
  * @param  {Object}     mongo The MongoDB database
  * @return {Function}         A function that handles the requeset
  */
-export function getGame(mongo) {
+export function joinGame(mongo) {
     const games = mongo.collection('games');
 
     return async function(req, res) {
-        var gameId = null;
+        var playerId = null;
 
         // Try converting the url param into a game ID to test validity
         try {
-            gameId = new ObjectId(req.params[0]);
+            playerId = new mongoose.Types.ObjectId(req.params.playerId);
         } catch(err) {
             res.send('invalid game ID');
             return;
         }
 
+        console.log(playerId);
+
         var game = await games.findOne({$or: [
-            {redPlayerId: gameId},
-            {blackPlayerId: gameId}
+            {redPlayerId: playerId},
+            {blackPlayerId: playerId}
         ]});
 
         if (game == null) {
@@ -54,5 +56,24 @@ export function createGame(mongo) {
         var result = await newGame.save();
 
         res.send(result);
+    }
+}
+
+export function makeMove(mongo) {
+    return async function(req, res) {
+        var gameId = null;
+
+        // Try converting the url param into a game ID to test validity
+        try {
+            gameId = new ObjectId(req.params.playerId);
+        } catch(err) {
+            res.send('invalid game ID');
+            return;
+        }
+
+        var game = await games.findOne({$or: [
+            {redPlayerId: gameId},
+            {blackPlayerId: gameId}
+        ]});
     }
 }
