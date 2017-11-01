@@ -37,42 +37,38 @@ export async function createGame(req, res) {
  * Check the validity of a proposed move and record it
  */
 export async function makeMove(req, res) {
-    var game = await getGameFromPlayerId(req.params.playerId);
-
-    var nextMove = req.body.nextMove;
-
-    if (!game.turnId.equals(nextMove.playerId)) {
-        res.status(400).send('Not your turn');
+    // Try converting the url param into a game ID to test validity
+    var playerId = null;
+    try {
+        playerId = new mongoose.Types.ObjectId(req.params.playerId);
+    } catch(err) {
+        res.status(400).send('Invalid player ID');
         return;
     }
 
-    if (nextMove.column < 0 || nextMove.column > 6) {
-        res.status(400).send(
-            'Invalid move, column must be between 0 and 6 inclusive'
-        );
+    var column = req.body.column;
+    var game = await getGameFromPlayerId(playerId);
+
+    if (game == null) {
+        res.status(400).send('No game found for this player');
         return;
     }
 
-    if (game.getColumnCapacity(nextMove.column) < 1) {
-        res.status(400).send('Invalid move, column must not be full')
+    try {
+        game.addPiece(playerId, column);
+    } catch(err) {
+        console.log('Error in making the next move:', err);
+        res.status(400).send(err);
+        return;
     }
-
-    game.addPiece(nextMove.playerId, nextMove.column);
 
     game = await game.save();
-    
+    console.log(game);
+
     res.send(game);
 }
 
 async function getGameFromPlayerId(playerId) {
-    // Try converting the url param into a game ID to test validity
-    try {
-        playerId = new mongoose.Types.ObjectId(playerId);
-    } catch(err) {
-        res.status(400).send('invalid player ID');
-        return;
-    }
-    console.log(playerId);
     var game = await Game.findOne({$or: [
         {redPlayerId: playerId},
         {blackPlayerId: playerId}
