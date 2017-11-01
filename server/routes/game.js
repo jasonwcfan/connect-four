@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Game } from '../lib/mongoSchemas';
+import Game from '../lib/models/Game';
 import mongoose from 'mongoose';
 
 /**
@@ -53,6 +53,6 @@ export function createGame(mongo) {
 
         var result = await newGame.save();
 
-        req.send(result);
+        res.send(result);
     }
 }
