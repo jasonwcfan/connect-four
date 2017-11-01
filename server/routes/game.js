@@ -21,10 +21,11 @@ export async function joinGame(req, res) {
  * Create a new game
  */
 export async function createGame(req, res) {
+    const newPlayerId = mongoose.Types.ObjectId();
     var newGame = new Game({
-        redPlayerId: mongoose.Types.ObjectId(),
+        redPlayerId: newPlayerId,
         blackPlayerId: null,
-        board: Array(6).fill(Array(7).fill(0))
+        turnId: newPlayerId
     });
 
     var result = await newGame.save();
@@ -39,6 +40,28 @@ export async function makeMove(req, res) {
     var game = await getGameFromPlayerId(req.params.playerId);
 
     var nextMove = req.body.nextMove;
+
+    if (!game.turnId.equals(nextMove.playerId)) {
+        res.status(400).send('Not your turn');
+        return;
+    }
+
+    if (nextMove.column < 0 || nextMove.column > 6) {
+        res.status(400).send(
+            'Invalid move, column must be between 0 and 6 inclusive'
+        );
+        return;
+    }
+
+    if (game.getColumnCapacity(nextMove.column) < 1) {
+        res.status(400).send('Invalid move, column must not be full')
+    }
+
+    game.addPiece(nextMove.playerId, nextMove.column);
+
+    game = await game.save();
+    
+    res.send(game);
 }
 
 async function getGameFromPlayerId(playerId) {
@@ -46,7 +69,7 @@ async function getGameFromPlayerId(playerId) {
     try {
         playerId = new mongoose.Types.ObjectId(playerId);
     } catch(err) {
-        res.send('invalid player ID');
+        res.status(400).send('invalid player ID');
         return;
     }
     console.log(playerId);
