@@ -21,6 +21,7 @@ const gameSchema = mongoose.Schema({
     redPlayerId: mongoose.Schema.Types.ObjectId,
     blackPlayerId: mongoose.Schema.Types.ObjectId,
     turnId: mongoose.Schema.Types.ObjectId,
+    winnerId: mongoose.Schema.Types.ObjectId,
     board: {
         type: [[Number]],
         default: Array(COLUMNS).fill(Array(ROWS).fill(EMPTY_CODE))
@@ -87,7 +88,9 @@ gameSchema.methods.addPiece = function(playerId, column) {
     for (let i = 0; i < ROWS; i++) {
         if (this.board[column][i] == EMPTY_CODE) {
             this.board[column][i] = playerCode;
-            this.checkForWinner(playerId, column, i);
+            if (this.checkForWinner(playerId, column, i)) {
+                this.winnerId = playerId;
+            };
             this.markModified('board');
             return;
         }

@@ -84,6 +84,11 @@ export async function makeMove(req, res) {
         return;
     }
 
+    if (game.winnerId != null) {
+        res.status(400).send('Invalid move, this game is over');
+        return;
+    }
+
     try {
         game.addPiece(playerId, column);
         game.changePlayer();
