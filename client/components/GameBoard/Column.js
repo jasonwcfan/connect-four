@@ -1,18 +1,21 @@
 import React from 'react';
+import Cell from './Cell';
+
+const styles = {
+    column: {
+
+    }
+}
 
 class Column extends React.Component {
-
-    _renderGameBoard(board) {
-        var columns = [];
-        board.forEach((column) => {
-            console.log(column);
-        })
-    }
-
     render() {
         return (
-            <div>
-                {this._renderGameBoard(this.props.game.board)}
+            <div style={styles.column}>
+                {
+                    this.props.cells.map((cell, idx) => {
+                        return <Cell key={idx} value={cell} />
+                    })
+                }
             </div>
         )
     }

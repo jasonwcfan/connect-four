@@ -33,7 +33,7 @@ class App extends React.Component {
         return (
             <div>{
                 this.state.game != null ?
-                <GameBoard game={this.state.game} /> :
+                <GameBoard game={this.state.game} playerId={this.state.playerId} /> :
                 <button onClick={this._handleJoinNewGame}>Join New Game</button>
             }</div>
         )
