@@ -13,7 +13,7 @@ export async function rejoinGame(req, res) {
         res.send('game not found');
     } else {
         console.log('found game');
-        res.send(game)
+        res.send({game})
     }
 }
 
@@ -33,7 +33,6 @@ export async function joinNewGame(req, res) {
     if (lobby != null) {
         lobby.blackPlayerId = newPlayerId;
         lobby = await lobby.save();
-        console.log('lobby');
         res.send({
             game: lobby,
             playerId: newPlayerId
@@ -46,7 +45,6 @@ export async function joinNewGame(req, res) {
         });
 
         var newGame = await newGame.save();
-        console.log('game');
         res.send({
             game: newGame,
             playerId: newPlayerId
@@ -99,7 +97,7 @@ export async function makeMove(req, res) {
         game.addPiece(playerId, column);
         game.changePlayer();
         game = await game.save();
-        res.send(game);
+        res.send({game});
     } catch(err) {
         console.log('Error in making the next move:', err);
         res.status(500).send(err.message);

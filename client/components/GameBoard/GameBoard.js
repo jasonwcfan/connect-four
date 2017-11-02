@@ -12,14 +12,21 @@ class GameBoard extends React.Component {
 
     _renderGameBoard(board) {
         return board.map((column, idx) => {
-            return <Column key={idx} cells={column} />
+            return <Column
+                key={idx}
+                cells={column}
+                handleClickColumn={() => this.props.handleClickColumn(idx)} />
         })
     }
 
     render() {
         return (
             <div>
-                <div>{this.props.game.turnId === this.props.playerId ? 'It\'s your turn, make a move' : 'Waiting for opponent to make a move...'}</div>
+                <div>{
+                    this.props.game.turnId === this.props.playerId ?
+                        'It\'s your turn, make a move' :
+                        'Waiting for opponent to make a move...'
+                }</div>
                 <div style={styles.gameBoard}>
                     {this._renderGameBoard(this.props.game.board)}
                 </div>
