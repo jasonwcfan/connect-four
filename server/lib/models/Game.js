@@ -1,11 +1,22 @@
 import mongoose from 'mongoose';
+import {
+    checkVerticalWinner,
+    checkHorizontalWinner,
+    checkDiagonalIncreasingWinner,
+    checkDiagonalDecreasingWinner,
+    getPlayerCode
+} from '../gameHelpers';
+import {
+    RED_PLAYER_CODE,
+    BLACK_PLAYER_CODE,
+    EMPTY_CODE,
+    ROWS,
+    COLUMNS,
+} from '../gameConfig';
 
-const RED_PLAYER_CODE = 1;
-const BLACK_PLAYER_CODE = 2;
-const EMPTY_CODE = 0;
-const ROWS = 6;
-const COLUMNS = 7;
-
+/**
+ * The Mongoose schema defining a Game object
+ */
 const gameSchema = mongoose.Schema({
     redPlayerId: mongoose.Schema.Types.ObjectId,
     blackPlayerId: mongoose.Schema.Types.ObjectId,
@@ -48,11 +59,13 @@ gameSchema.methods.getColumnCapacity = function(column) {
         throw new Error('Invalid column');
     }
 
-    this.board[column].forEach((index, cell) => {
-        if (cell != EMPTY_CODE) {
-            return index;
+    for (let i = ROWS - 1; i >= 0; i--) {
+        if (this.board[column][i] != EMPTY_CODE) {
+            console.log('capacity', ROWS - 1 - i);
+            return ROWS - 1 - i;
         }
-    })
+    }
+
     return ROWS;
 }
 
@@ -68,20 +81,13 @@ gameSchema.methods.addPiece = function(playerId, column) {
         throw new Error('Invalid move, column is full');
     }
 
-    var playerCode = null;
-
-    if (this.redPlayerId.equals(playerId)) {
-        playerCode = RED_PLAYER_CODE;
-    } else if (this.blackPlayerId.equals(playerId)) {
-        playerCode = BLACK_PLAYER_CODE;
-    } else {
-        throw new Error('Invalid player ID for this game');
-    }
+    const playerCode = getPlayerCode(playerId, this);
 
     // Find the right cell to insert the new piece into
     for (let i = 0; i < ROWS; i++) {
         if (this.board[column][i] == EMPTY_CODE) {
             this.board[column][i] = playerCode;
+            this.checkForWinner(playerId, column, i);
             this.markModified('board');
             return;
         }
@@ -99,6 +105,29 @@ gameSchema.methods.changePlayer = function() {
     } else {
         throw new Error('Invalid player ID on turnId field')
     }
+}
+
+/**
+ * Determine if this game has a winner based on the last move made at
+ * [column, row]
+ */
+gameSchema.methods.checkForWinner = function(playerId, column, row) {
+    const playerCode = getPlayerCode(playerId, this);
+    var verticalCount = 1;
+
+    // Check to see if this move is a winning move by examining tiles in all
+    // directions from the last move made
+    const vertical = checkVerticalWinner(this.board, playerCode, column, row);
+    const horizontal = checkHorizontalWinner(this.board, playerCode, column, row);
+    const diagIncr = checkDiagonalIncreasingWinner(this.board, playerCode, column, row);
+    const diagDecr = checkDiagonalDecreasingWinner(this.board, playerCode, column, row)
+
+    console.log('vertical:', vertical);
+    console.log('horizontal:', horizontal);
+    console.log('diagonal increasing:', diagIncr);
+    console.log('diagonal decreasing:', diagDecr);
+
+    return (vertical || horizontal || diagIncr || diagDecr);
 }
 
 const Game = mongoose.model('Game', gameSchema);

@@ -3,7 +3,7 @@ import Game from '../lib/models/Game';
 import mongoose from 'mongoose';
 
 /**
- * Get a game from the database based on the given ID, if one exists
+ * Rejoin a game that the player has already started, if one exists
  */
 export async function rejoinGame(req, res) {
     var game = await getGameFromPlayerId(req.params.playerId);
@@ -18,7 +18,8 @@ export async function rejoinGame(req, res) {
 }
 
 /**
- * Create a new game
+ * Create a new player ID and attempt to join a lobby with one player,
+ * or create a new game if no lobbies exist.
  */
 export async function joinNewGame(req, res) {
     const newPlayerId = mongoose.Types.ObjectId();
@@ -50,7 +51,8 @@ export async function joinNewGame(req, res) {
 }
 
 /**
- * Check the validity of a proposed move and record it
+ * Check the validity of a proposed move and attempt to make it, sending the
+ * result back to the client
  */
 export async function makeMove(req, res) {
     // Try converting the url param into a game ID to test validity
@@ -89,11 +91,14 @@ export async function makeMove(req, res) {
         res.send(game);
     } catch(err) {
         console.log('Error in making the next move:', err);
-        res.status(500).send(err);
+        res.status(500).send(err.message);
         return;
     }
 }
 
+/**
+ * Look up a game that has the given player in it.
+ */
 async function getGameFromPlayerId(playerId) {
     var game = await Game.findOne({$or: [
         {redPlayerId: playerId},
