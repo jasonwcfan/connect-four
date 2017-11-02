@@ -5,6 +5,9 @@ import Column from './Column';
 const styles = {
     gameBoard: {
         display: 'flex'
+    },
+    errorMessage: {
+        color: '#ff0000'
     }
 };
 
@@ -30,6 +33,7 @@ class GameBoard extends React.Component {
                 <div style={styles.gameBoard}>
                     {this._renderGameBoard(this.props.game.board)}
                 </div>
+                <div style={styles.errorMessage}>{this.props.error}</div>
             </div>
         )
     }

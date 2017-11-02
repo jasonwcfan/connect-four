@@ -49,6 +49,7 @@ class App extends React.Component {
         } else {
             const data = await response.json();
             nextState.game = data.game;
+            nextState.error = null;
         }
 
         this.setState(nextState);

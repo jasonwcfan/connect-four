@@ -19,16 +19,16 @@ class Cell extends React.Component {
 
         switch (this.props.value) {
             case 0:
-                styles.cell.backgroundColor = 'lightgrey';
+                styles.cell.backgroundColor = '#cecece';
                 break;
             case RED_PLAYER_CODE:
-                styles.cell.backgroundColor = 'red';
+                styles.cell.backgroundColor = '#e22b2b';
                 break;
             case BLACK_PLAYER_CODE:
-                styles.cell.backgroundColor = 'black';
+                styles.cell.backgroundColor = '#1a1c1a';
                 break;
             default:
-                styles.cell.backgroundColor = 'lightgrey';
+                styles.cell.backgroundColor = '#cecece';
         }
 
         return (
