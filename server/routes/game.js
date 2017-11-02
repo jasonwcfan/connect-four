@@ -33,8 +33,11 @@ export async function joinNewGame(req, res) {
     if (lobby != null) {
         lobby.blackPlayerId = newPlayerId;
         lobby = await lobby.save();
-
-        res.send(lobby);
+        console.log('lobby');
+        res.send({
+            game: lobby,
+            playerId: newPlayerId
+        });
     } else {
         var newGame = new Game({
             redPlayerId: newPlayerId,
@@ -43,8 +46,11 @@ export async function joinNewGame(req, res) {
         });
 
         var newGame = await newGame.save();
-
-        res.send(newGame);
+        console.log('game');
+        res.send({
+            game: newGame,
+            playerId: newPlayerId
+        });
     }
 
 
