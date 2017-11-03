@@ -8,6 +8,7 @@ class App extends React.Component {
 
         this.state = {
             playerId: null,
+            playerColour: null,
             game: null,
             error: null
         }
@@ -24,12 +25,21 @@ class App extends React.Component {
 
         const data = await response.json();
 
-        this.setState({
-            game: data.game,
-            playerId: data.playerId
-        });
+        var newState = {};
 
+        if (data.playerId === data.game.redPlayerId) {
+            newState.playerColour = 'red';
+        } else if (data.playerId === data.game.blackPlayerId) {
+            newState.playerColour = 'black';
+        } else {
+            newState.error = 'You don\'t belong in this game!';
+            throw new Error('Wrong player for this game');
+        }
 
+        newState.game = data.game;
+        newState.playerId = data.playerId;
+
+        this.setState(newState);
     }
 
     async _handleClickColumn(idx) {
@@ -71,7 +81,7 @@ class App extends React.Component {
             })
         }
 
-        setTimeout(this._pollForUpdates, 3000);
+        setTimeout(this._pollForUpdates, 1000);
     }
 
     render() {
@@ -82,6 +92,7 @@ class App extends React.Component {
                     game={this.state.game}
                     error={this.state.error}
                     playerId={this.state.playerId}
+                    playerColour={this.state.playerColour}
                     handleClickColumn={this._handleClickColumn}
                     pollForUpdates={this._pollForUpdates}
                     /> :

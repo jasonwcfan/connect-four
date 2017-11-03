@@ -7,7 +7,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { connectMongo } from './lib/mongoTools';
 
-import { rejoinGame, joinNewGame, makeMove } from './routes/game';
+import { fetchGame, joinNewGame, makeMove } from './routes/game';
 
 /**
  * Express configuration
@@ -24,7 +24,7 @@ const start = async () => {
         next();
     });
 
-    app.get('/game/:playerId', bodyParser.json(), rejoinGame);
+    app.get('/game/:playerId', bodyParser.json(), fetchGame);
     app.post('/game/', bodyParser.json(), joinNewGame);
     app.post('/game/:playerId', bodyParser.json(), makeMove);
 

@@ -12,6 +12,10 @@ const styles = {
 
 class GameBoard extends React.Component {
 
+    componentDidMount() {
+        this.props.pollForUpdates();
+    }
+
     _renderGameBoard(board) {
         return board.map((column, idx) => {
             return <Column
@@ -21,18 +25,32 @@ class GameBoard extends React.Component {
         })
     }
 
-    componentDidMount() {
-        this.props.pollForUpdates();
+    _renderGameMessage(playerId, turnId, winnerId) {
+        if (winnerId != null) {
+            return winnerId === playerId ?
+                'Congratulations, you\'ve won the game!' :
+                'Your opponent has won the game!'
+        }
+
+        if (turnId != null) {
+            return turnId === playerId ? 'It\'s your turn, make a move' :
+            'Waiting for opponent to make a move...';
+        }
     }
 
     render() {
         return (
             <div>
-                <div>{
-                    this.props.game.turnId === this.props.playerId ?
-                        'It\'s your turn, make a move' :
-                        'Waiting for opponent to make a move...'
-                }</div>
+                <div>
+                    {'You are ' + this.props.playerColour + ' player.'}
+                </div>
+                <div>
+                    {this._renderGameMessage(
+                        this.props.playerId,
+                        this.props.game.turnId,
+                        this.props.game.winnerId
+                    )}
+                </div>
                 <div style={styles.gameBoard}>
                     {this._renderGameBoard(this.props.game.board)}
                 </div>
