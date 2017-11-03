@@ -69,10 +69,12 @@ export async function leaveRoom(playerId) {
  * Check the validity of a proposed move and attempt to make it, sending the
  * result back to the client
  */
-export async function makeMove(playerId, game, column) {
+export async function makeMove(playerId, column) {
     if (! playerId instanceof mongoose.Schema.Types.ObjectId) {
         throw new Error('Invalid player ID');
     }
+
+    var game = await getGameFromPlayerId(playerId);
 
     if (!(playerId.equals(game.redPlayerId) ||
             playerId.equals(game.blackPlayerId))) {

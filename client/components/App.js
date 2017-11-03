@@ -22,9 +22,11 @@ class App extends React.Component {
     async _handleJoinNewGame() {
         const socket = io.connect(SERVER_URL);
 
+        // This player has joined the game
         socket.on('joined game', (data) => {
             var nextState = {};
 
+            // Set up game data
             if (data.playerId === data.game.redPlayerId) {
                 nextState.playerColour = 'red';
             } else if (data.playerId === data.game.blackPlayerId) {
@@ -41,17 +43,29 @@ class App extends React.Component {
             this.setState(nextState);
         });
 
-        socket.on('new move', (data) => {
+        // The opponent has joined, update the game board
+        socket.on('player joined', (data) => {
+            console.log('player joined');
+            console.log(data);
             if (data.game != null) {
-                console.log('new move');
                 this.setState({
                     game: data.game
                 });
             }
+        })
+
+        // A new move has been made, update the game board
+        socket.on('new move', (data) => {
+            if (data.game != null) {
+                this.setState({
+                    game: data.game,
+                    error: null
+                });
+            }
         });
 
+        // The move is invalid, update the error message
         socket.on('invalid move', (data) => {
-            console.log('invalid move');
             this.setState({
                 error: data
             })
