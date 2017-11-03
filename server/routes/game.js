@@ -3,16 +3,14 @@ import Game from '../lib/models/Game';
 import mongoose from 'mongoose';
 
 /**
- * Rejoin a game that the player has already started, if one exists
+ * Get the latest version of this game, if it exists
  */
-export async function rejoinGame(req, res) {
+export async function fetchGame(req, res) {
     var game = await getGameFromPlayerId(req.params.playerId);
 
     if (game == null) {
-        console.log('game not found');
-        res.send('game not found');
+        res.status(400).send('Game not found');
     } else {
-        console.log('found game');
         res.send({game})
     }
 }

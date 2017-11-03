@@ -107,7 +107,7 @@ export function checkDiagonalIncreasingWinner(board, playerCode, column, row) {
             leftCursor = -1;
         }
 
-        if (rightCursor <= COLUMNS - 1 && topCursor <= ROWS -1 && board[rightCursor][bottomCursor] === playerCode) {
+        if (rightCursor <= COLUMNS - 1 && topCursor <= ROWS -1 && board[rightCursor][topCursor] === playerCode) {
             count++;
             topCursor++;
             rightCursor++;
