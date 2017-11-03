@@ -3,19 +3,6 @@ import Game from '../lib/models/Game';
 import mongoose from 'mongoose';
 
 /**
- * Get the latest version of this game, if it exists
- */
-export async function fetchGame(req, res) {
-    var game = await getGameFromPlayerId(req.params.playerId);
-
-    if (game == null) {
-        res.status(400).send('Game not found');
-    } else {
-        res.send({game})
-    }
-}
-
-/**
  * Create a new player ID and attempt to join a lobby with one player,
  * or create a new game if no lobbies exist.
  */
@@ -62,8 +49,6 @@ export async function leaveRoom(playerId) {
     ]})
 
     games.forEach(async (game) => {
-        console.log('start', game);
-        console.log('playerId', playerId);
         if (playerId.equals(game.redPlayerId)) {
             game.redPlayerId = null;
         }
@@ -73,11 +58,8 @@ export async function leaveRoom(playerId) {
         }
 
         if (game.redPlayerId == null && game.blackPlayerId == null) {
-            console.log('remove');
             await game.remove();
         }
-
-        console.log('end', game);
 
         game.save();
     })
@@ -87,51 +69,32 @@ export async function leaveRoom(playerId) {
  * Check the validity of a proposed move and attempt to make it, sending the
  * result back to the client
  */
-export async function makeMove(req, res) {
-    // Try converting the url param into a game ID to test validity
-    var playerId = req.params.playerId;
-    var column = req.body.column;
-
-    if (playerId.length != 24) {
-        res.status(400).send('Invalid player ID');
-        return;
+export async function makeMove(playerId, game, column) {
+    if (! playerId instanceof mongoose.Schema.Types.ObjectId) {
+        throw new Error('Invalid player ID');
     }
 
-    // Convert playerId to a mongoose ObjectId
-    playerId = new mongoose.Types.ObjectId(playerId);
-
-    var game = await getGameFromPlayerId(playerId);
-
-    if (game == null) {
-        res.status(400).send('No game found for this player');
-        return;
+    if (!(playerId.equals(game.redPlayerId) ||
+            playerId.equals(game.blackPlayerId))) {
+        throw new Error('The given player doesn\'t belong in this game');
     }
 
     if (!game.turnId.equals(playerId)) {
-        res.status(400).send('Invalid move, not this player\'s turn');
-        return;
+        throw new Error('Invalid move, not this player\'s turn');
     }
 
     if (game.blackPlayerId === null || game.redPlayerId === null) {
-        res.status(400).send('Invalid move, one player is missing');
-        return;
+        throw new Error('Invalid move, one player is missing');
     }
 
     if (game.winnerId != null) {
-        res.status(400).send('Invalid move, this game is over');
-        return;
+        throw new Error('Invalid move, this game is over');
     }
 
-    try {
-        game.addPiece(playerId, column);
-        game.changePlayer();
-        game = await game.save();
-        res.send({game});
-    } catch(err) {
-        console.log('Error in making the next move:', err);
-        res.status(500).send(err.message);
-        return;
-    }
+    game.addPiece(playerId, column);
+    game.changePlayer();
+    game = await game.save();
+    return game;
 }
 
 /**
