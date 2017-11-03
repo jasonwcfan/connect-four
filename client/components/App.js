@@ -12,11 +12,17 @@ class App extends React.Component {
             playerColour: null,
             game: null,
             error: null,
+            opponentLeft: false,
             socket: null
         }
 
         this._handleJoinNewGame = this._handleJoinNewGame.bind(this);
         this._handleClickColumn = this._handleClickColumn.bind(this);
+    }
+
+    componentWillUnmount() {
+        // Disconnect this player if the page is reloaded or navigated away from
+        this.state.socket.emit('disconnect');
     }
 
     async _handleJoinNewGame() {
@@ -45,13 +51,19 @@ class App extends React.Component {
 
         // The opponent has joined, update the game board
         socket.on('player joined', (data) => {
-            console.log('player joined');
-            console.log(data);
             if (data.game != null) {
                 this.setState({
                     game: data.game
                 });
             }
+        });
+
+        socket.on('player left', () => {
+            console.log('player left');
+            this.setState({
+                opponentLeft: true,
+                error: 'Game is over'
+            });
         })
 
         // A new move has been made, update the game board
@@ -73,7 +85,9 @@ class App extends React.Component {
     }
 
     async _handleClickColumn(column) {
-        this.state.socket.emit('make move', column);
+        if (!this.state.opponentLeft) {
+            this.state.socket.emit('make move', column);
+        }
     }
 
     render() {
@@ -83,6 +97,7 @@ class App extends React.Component {
                 <GameBoard
                     game={this.state.game}
                     error={this.state.error}
+                    opponentLeft={this.state.opponentLeft}
                     playerId={this.state.playerId}
                     playerColour={this.state.playerColour}
                     handleClickColumn={this._handleClickColumn}
