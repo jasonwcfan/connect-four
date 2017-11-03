@@ -20,6 +20,7 @@ import {
 const gameSchema = mongoose.Schema({
     redPlayerId: mongoose.Schema.Types.ObjectId,
     blackPlayerId: mongoose.Schema.Types.ObjectId,
+    gameId: mongoose.Schema.Types.ObjectId,
     turnId: mongoose.Schema.Types.ObjectId,
     winnerId: mongoose.Schema.Types.ObjectId,
     board: {

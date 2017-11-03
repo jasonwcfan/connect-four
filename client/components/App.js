@@ -1,6 +1,7 @@
 import React from 'react';
 import { SERVER_URL } from '../config';
 import GameBoard from './GameBoard/GameBoard';
+import io from 'socket.io-client';
 
 class App extends React.Component {
     constructor(props) {
@@ -19,27 +20,29 @@ class App extends React.Component {
     }
 
     async _handleJoinNewGame() {
-        const response = await fetch(SERVER_URL + '/game', {
-            method: 'POST'
-        });
+        // const response = await fetch(SERVER_URL + '/game', {
+        //     method: 'POST'
+        // });
 
-        const data = await response.json();
+        const socket = io.connect(SERVER_URL);
 
-        var newState = {};
-
-        if (data.playerId === data.game.redPlayerId) {
-            newState.playerColour = 'red';
-        } else if (data.playerId === data.game.blackPlayerId) {
-            newState.playerColour = 'black';
-        } else {
-            newState.error = 'You don\'t belong in this game!';
-            throw new Error('Wrong player for this game');
-        }
-
-        newState.game = data.game;
-        newState.playerId = data.playerId;
-
-        this.setState(newState);
+        // const data = await response.json();
+        //
+        // var newState = {};
+        //
+        // if (data.playerId === data.game.redPlayerId) {
+        //     newState.playerColour = 'red';
+        // } else if (data.playerId === data.game.blackPlayerId) {
+        //     newState.playerColour = 'black';
+        // } else {
+        //     newState.error = 'You don\'t belong in this game!';
+        //     throw new Error('Wrong player for this game');
+        // }
+        //
+        // newState.game = data.game;
+        // newState.playerId = data.playerId;
+        //
+        // this.setState(newState);
     }
 
     async _handleClickColumn(idx) {
