@@ -50,7 +50,8 @@ class App extends React.Component {
             }
         });
 
-        socket.on('error', (data) => {
+        socket.on('invalid move', (data) => {
+            console.log('invalid move');
             this.setState({
                 error: data
             })
