@@ -20,19 +20,6 @@ class GameBoard extends React.Component {
         })
     }
 
-    _renderGameMessage(playerId, turnId, winnerId) {
-        if (winnerId != null) {
-            return winnerId === playerId ?
-                'Congratulations, you\'ve won the game!' :
-                'Your opponent has won the game!'
-        }
-
-        if (turnId != null) {
-            return turnId === playerId ? 'It\'s your turn, make a move' :
-            'Waiting for opponent to make a move...';
-        }
-    }
-
     render() {
         return (
             <div>

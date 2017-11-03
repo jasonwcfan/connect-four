@@ -47,6 +47,7 @@ const start = async () => {
         // On disconnect, leave rooms
         client.on('disconnect', async () => {
             console.log('client disconnected');
+            client.broadcast.to(game.gameId).emit('player left');
             await leaveRoom(playerId);
         });
     });
