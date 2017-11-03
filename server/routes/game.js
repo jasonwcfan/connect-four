@@ -19,7 +19,7 @@ export async function fetchGame(req, res) {
  * Create a new player ID and attempt to join a lobby with one player,
  * or create a new game if no lobbies exist.
  */
-export async function joinNewGame(req, res) {
+export async function joinRoom() {
     const newPlayerId = mongoose.Types.ObjectId();
 
     // Try to find a game with a player already in it
@@ -31,25 +31,56 @@ export async function joinNewGame(req, res) {
     if (lobby != null) {
         lobby.blackPlayerId = newPlayerId;
         lobby = await lobby.save();
-        res.send({
+        return {
             game: lobby,
             playerId: newPlayerId
-        });
+        };
     } else {
         var newGame = new Game({
             redPlayerId: newPlayerId,
             blackPlayerId: null,
+            gameId: mongoose.Types.ObjectId(),
             turnId: newPlayerId
         });
 
         var newGame = await newGame.save();
-        res.send({
+        return {
             game: newGame,
             playerId: newPlayerId
-        });
+        };
     }
+}
 
+/**
+ * Remove the player from any rooms they are in. If this is the last player to
+ * leave, destroy the room.
+ */
+export async function leaveRoom(playerId) {
+    const games = await Game.find({$or: [
+        {redPlayerId: playerId},
+        {blackPlayerId: playerId}
+    ]})
 
+    games.forEach(async (game) => {
+        console.log('start', game);
+        console.log('playerId', playerId);
+        if (playerId.equals(game.redPlayerId)) {
+            game.redPlayerId = null;
+        }
+
+        if (playerId.equals(game.blackPlayerId)) {
+            game.blackPlayerId = null;
+        }
+
+        if (game.redPlayerId == null && game.blackPlayerId == null) {
+            console.log('remove');
+            await game.remove();
+        }
+
+        console.log('end', game);
+
+        game.save();
+    })
 }
 
 /**

@@ -4,10 +4,12 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
+import http from 'http';
+import sio from 'socket.io';
 import bodyParser from 'body-parser';
 import { connectMongo } from './lib/mongoTools';
 
-import { fetchGame, joinNewGame, makeMove } from './routes/game';
+import { fetchGame, joinRoom, makeMove, leaveRoom } from './routes/game';
 
 /**
  * Express configuration
@@ -16,20 +18,26 @@ import { fetchGame, joinNewGame, makeMove } from './routes/game';
 const start = async () => {
     const mongo = await connectMongo();
     const app = express();
+    const server = http.createServer(app);
+    const io = new sio(server);
 
-    app.use(function(req, res, next) {
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-        next();
+    io.on('connection', async function(client) {
+        console.log('client connected');
+
+        const {game, playerId} = await joinRoom();
+
+        console.log(game, playerId);
+
+        client.join(game.gameId);
+        io.to(game.gameId).emit('player joined');
+        client.on('disconnect', () => {
+            console.log('client disconnected');
+            leaveRoom(playerId);
+        })
     });
 
-    app.get('/game/:playerId', bodyParser.json(), fetchGame);
-    app.post('/game/', bodyParser.json(), joinNewGame);
-    app.post('/game/:playerId', bodyParser.json(), makeMove);
 
-
-    app.listen(process.env.PORT, function() {
+    server.listen(process.env.PORT, function() {
         console.log('Listening on port', process.env.PORT)
     })
 }
