@@ -1,12 +1,11 @@
 import React from 'react';
 import Column from './Column';
+import Header from './Header';
 
 const styles = {
     gameBoard: {
-        display: 'flex'
-    },
-    errorMessage: {
-        color: '#ff0000'
+        display: 'flex',
+        justifyContent: 'space-around'
     }
 };
 
@@ -41,20 +40,10 @@ class GameBoard extends React.Component {
     render() {
         return (
             <div>
-                <div>
-                    {'You are ' + this.props.playerColour + ' player.'}
-                </div>
-                <div>
-                    {this._renderGameMessage(
-                        this.props.playerId,
-                        this.props.game.turnId,
-                        this.props.game.winnerId
-                    )}
-                </div>
+                <Header {...this.props} />
                 <div style={styles.gameBoard}>
                     {this._renderGameBoard(this.props.game.board)}
                 </div>
-                <div style={styles.errorMessage}>{this.props.error}</div>
             </div>
         )
     }
