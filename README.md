@@ -28,7 +28,7 @@ Open another tab or window at the same address to connect as player 2.
 Click `Join New Game` to be placed into a game.
 
 ## Demo
-Instead of cloning and building the project, a live demo of this app can also be found [here](A live demo of this app can be found [here](http://ec2-35-163-247-38.us-west-2.compute.amazonaws.com:8080/)
+Instead of cloning and building the project, a live demo of this app can also be found [here](A live demo of this app can be found [here](http://ec2-34-208-101-75.us-west-2.compute.amazonaws.com:8080/)
 
 ## Stuff I used to make it
 - [Webpack](https://webpack.js.org/)
