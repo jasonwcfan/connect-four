@@ -38,9 +38,8 @@ const start = async () => {
                 let nextGameState = await makeMove(playerId, game, column);
                 io.in(game.gameId).emit('new move', {game: nextGameState})
             } catch(err) {
-                console.log('asdf');
                 // If move is invalid, emit error to this client
-                client.emit('error', err.message)
+                client.emit('invalid move', err.message);
             }
         });
 
