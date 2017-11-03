@@ -58,6 +58,7 @@ class App extends React.Component {
             }
         });
 
+        // The opponent has left, game is over
         socket.on('player left', () => {
             console.log('player left');
             this.setState({

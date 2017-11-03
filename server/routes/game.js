@@ -10,10 +10,7 @@ export async function joinRoom() {
     const newPlayerId = mongoose.Types.ObjectId();
 
     // Try to find a game with a player already in it
-    var lobby = await Game.findOne({$or: [
-        {redPlayerId: null},
-        {blackPlayerId: null}
-    ]});
+    var lobby = await getGameFromPlayerId(null);
 
     if (lobby != null) {
         lobby.blackPlayerId = newPlayerId;
@@ -39,30 +36,25 @@ export async function joinRoom() {
 }
 
 /**
- * Remove the player from any rooms they are in. If this is the last player to
+ * Remove the player from the room they are in. If this is the last player to
  * leave, destroy the room.
  */
 export async function leaveRoom(playerId) {
-    const games = await Game.find({$or: [
-        {redPlayerId: playerId},
-        {blackPlayerId: playerId}
-    ]})
+    const game = await getGameFromPlayerId(playerId);
 
-    games.forEach(async (game) => {
-        if (playerId.equals(game.redPlayerId)) {
-            game.redPlayerId = null;
-        }
+    if (playerId.equals(game.redPlayerId)) {
+        game.redPlayerId = null;
+    }
 
-        if (playerId.equals(game.blackPlayerId)) {
-            game.blackPlayerId = null;
-        }
+    if (playerId.equals(game.blackPlayerId)) {
+        game.blackPlayerId = null;
+    }
 
-        if (game.redPlayerId == null && game.blackPlayerId == null) {
-            await game.remove();
-        }
+    if (game.redPlayerId == null && game.blackPlayerId == null) {
+        await game.remove();
+    }
 
-        game.save();
-    })
+    game.save();
 }
 
 /**
