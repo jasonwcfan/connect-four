@@ -21,6 +21,10 @@ class GameBoard extends React.Component {
         })
     }
 
+    componentDidMount() {
+        this.props.pollForUpdates();
+    }
+
     render() {
         return (
             <div>

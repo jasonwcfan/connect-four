@@ -14,6 +14,7 @@ class App extends React.Component {
 
         this._handleJoinNewGame = this._handleJoinNewGame.bind(this);
         this._handleClickColumn = this._handleClickColumn.bind(this);
+        this._pollForUpdates = this._pollForUpdates.bind(this);
     }
 
     async _handleJoinNewGame() {
@@ -55,6 +56,24 @@ class App extends React.Component {
         this.setState(nextState);
     }
 
+    async _pollForUpdates() {
+        console.log('polling');
+
+        const response = await fetch(SERVER_URL + '/game/' + this.state.playerId, {
+            method: 'GET'
+        });
+
+        if (response.status === 200) {
+            const data = await response.json();
+
+            this.setState({
+                game: data.game
+            })
+        }
+
+        setTimeout(this._pollForUpdates, 3000);
+    }
+
     render() {
         return (
             <div>{
@@ -64,6 +83,7 @@ class App extends React.Component {
                     error={this.state.error}
                     playerId={this.state.playerId}
                     handleClickColumn={this._handleClickColumn}
+                    pollForUpdates={this._pollForUpdates}
                     /> :
                 <button onClick={this._handleJoinNewGame}>Join New Game</button>
             }</div>
