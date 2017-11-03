@@ -27,21 +27,23 @@ const styles = {
 
 class Header extends React.Component {
 
-    _renderGameMessage(playerId, turnId, winnerId, opponentLeft) {
-        if (winnerId != null) {
-            return winnerId === playerId ?
+    _renderGameMessage(playerId, game, opponentLeft) {
+        if (game.winnerId != null) {
+            return game.winnerId === playerId ?
                 'Congratulations, you\'ve won the game!' :
                 'Your opponent has won the game!';
         }
-
-        console.log(opponentLeft);
 
         if (opponentLeft) {
             return 'Opponent has left the game';
         }
 
-        if (turnId != null) {
-            return turnId === playerId ? 'It\'s your turn, make a move' :
+        if (game.redPlayerId === null || game.blackPlayerId === null) {
+            return 'Waiting for opponent to join...';
+        }
+
+        if (game.turnId != null) {
+            return game.turnId === playerId ? 'It\'s your turn, make a move' :
             'Waiting for opponent to make a move...';
         }
     }
@@ -56,8 +58,7 @@ class Header extends React.Component {
                     <div style={styles.gameMessage}>
                         {this._renderGameMessage(
                             this.props.playerId,
-                            this.props.game.turnId,
-                            this.props.game.winnerId,
+                            this.props.game,
                             this.props.opponentLeft
                         )}
                     </div>
