@@ -11,10 +11,6 @@ const styles = {
 
 class GameBoard extends React.Component {
 
-    componentDidMount() {
-        this.props.pollForUpdates();
-    }
-
     _renderGameBoard(board) {
         return board.map((column, idx) => {
             return <Column

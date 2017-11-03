@@ -11,80 +11,54 @@ class App extends React.Component {
             playerId: null,
             playerColour: null,
             game: null,
-            error: null
+            error: null,
+            socket: null
         }
 
         this._handleJoinNewGame = this._handleJoinNewGame.bind(this);
         this._handleClickColumn = this._handleClickColumn.bind(this);
-        this._pollForUpdates = this._pollForUpdates.bind(this);
     }
 
     async _handleJoinNewGame() {
-        // const response = await fetch(SERVER_URL + '/game', {
-        //     method: 'POST'
-        // });
-
         const socket = io.connect(SERVER_URL);
 
-        // const data = await response.json();
-        //
-        // var newState = {};
-        //
-        // if (data.playerId === data.game.redPlayerId) {
-        //     newState.playerColour = 'red';
-        // } else if (data.playerId === data.game.blackPlayerId) {
-        //     newState.playerColour = 'black';
-        // } else {
-        //     newState.error = 'You don\'t belong in this game!';
-        //     throw new Error('Wrong player for this game');
-        // }
-        //
-        // newState.game = data.game;
-        // newState.playerId = data.playerId;
-        //
-        // this.setState(newState);
-    }
+        socket.on('joined game', (data) => {
+            var nextState = {};
 
-    async _handleClickColumn(idx) {
-        const response = await fetch(SERVER_URL + '/game/' + this.state.playerId, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                column: idx
-            })
-        });
+            if (data.playerId === data.game.redPlayerId) {
+                nextState.playerColour = 'red';
+            } else if (data.playerId === data.game.blackPlayerId) {
+                nextState.playerColour = 'black';
+            } else {
+                nextState.error = 'You don\'t belong in this game!';
+                throw new Error('Wrong player for this game');
+            }
 
-        var nextState = {};
-
-        if (response.status != 200) {
-            nextState.error = await response.text();
-        } else {
-            const data = await response.json();
             nextState.game = data.game;
-            nextState.error = null;
-        }
+            nextState.playerId = data.playerId;
+            nextState.socket = socket;
 
-        this.setState(nextState);
-    }
-
-    async _pollForUpdates() {
-        console.log('polling');
-
-        const response = await fetch(SERVER_URL + '/game/' + this.state.playerId, {
-            method: 'GET'
+            this.setState(nextState);
         });
 
-        if (response.status === 200) {
-            const data = await response.json();
+        socket.on('new move', (data) => {
+            if (data.game != null) {
+                console.log('new move');
+                this.setState({
+                    game: data.game
+                });
+            }
+        });
 
+        socket.on('error', (data) => {
             this.setState({
-                game: data.game
+                error: data
             })
-        }
+        });
+    }
 
-        setTimeout(this._pollForUpdates, 1000);
+    async _handleClickColumn(column) {
+        this.state.socket.emit('make move', column);
     }
 
     render() {
@@ -97,7 +71,6 @@ class App extends React.Component {
                     playerId={this.state.playerId}
                     playerColour={this.state.playerColour}
                     handleClickColumn={this._handleClickColumn}
-                    pollForUpdates={this._pollForUpdates}
                     /> :
                 <button onClick={this._handleJoinNewGame}>Join New Game</button>
             }</div>
